@@ -83,7 +83,11 @@ const operations: Record<ProcessingOperation, OperationConfig> = {
   notch: { 
     name: "Notch Filter", 
     endpoint: "/api/notch-filter", 
-    params: [{ name: "radius", type: "number", default: 10, min: 1, max: 50, step: 1 }],
+    params: [
+      { name: "center_u", type: "number", default: 30, min: -100, max: 100, step: 5 },
+      { name: "center_v", type: "number", default: 30, min: -100, max: 100, step: 5 },
+      { name: "radius", type: "number", default: 10, min: 1, max: 50, step: 1 }
+    ],
     category: "Frequency Domain"
   },
   encrypt: { 
@@ -170,7 +174,18 @@ export default function Home() {
 
     try {
       const config = operations[selectedOperation];
-      const body: Record<string, unknown> = { image: originalImage, ...params };
+      let body: Record<string, unknown> = { image: originalImage, ...params };
+
+      // Handle notch filter specially to construct centers array
+      if (selectedOperation === "notch") {
+        const center_u = params["center_u"] ?? 30;
+        const center_v = params["center_v"] ?? 30;
+        body = {
+          image: originalImage,
+          centers: [[center_u, center_v]],
+          radius: params["radius"] ?? 10
+        };
+      }
 
       const response = await fetch(`${API_BASE_URL}${config.endpoint}`, {
         method: "POST",
@@ -483,10 +498,10 @@ export default function Home() {
 
 function getOperationDescription(op: ProcessingOperation): string {
   const descriptions: Record<ProcessingOperation, string> = {
-    grayscale: "Converts an RGB image to grayscale using the luminosity method: 0.2989*R + 0.5870*G + 0.1140*B (Lecture 5, 4)",
+    grayscale: "Converts an RGB image to grayscale using the luminosity method: 0.2989*R + 0.5870*G + 0.1140*B (Lectures 4 & 5)",
     negative: "Applies the image negative operation: S = 255 - r. Dark pixels become light and vice versa (Lecture 4)",
-    log: "Applies logarithmic transformation: s = c * ln(1 + r). Expands dark pixel values and compresses bright ones (Lecture 5, 4)",
-    gamma: "Applies power-law (gamma) transformation: s = c * r^γ. Gamma < 1 brightens, gamma > 1 darkens (Lecture 5, 4)",
+    log: "Applies logarithmic transformation: s = c * ln(1 + r). Expands dark pixel values and compresses bright ones (Lectures 4 & 5)",
+    gamma: "Applies power-law (gamma) transformation: s = c * r^γ. Gamma < 1 brightens, gamma > 1 darkens (Lectures 4 & 5)",
     histogram: "Applies histogram equalization to improve contrast by redistributing pixel intensities (Lecture 5)",
     binary: "Converts image to binary (black/white) based on threshold value (Lecture 4)",
     "salt-pepper": "Adds Salt & Pepper noise by randomly setting pixels to 0 or 255 (Lecture 6)",
