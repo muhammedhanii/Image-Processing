@@ -69,6 +69,11 @@ A comprehensive full-stack application for Image Processing and Cryptography bas
    ```
    
    The API will be available at `http://localhost:5000`
+   
+   For development with debug mode enabled:
+   ```bash
+   FLASK_DEBUG=true python app.py
+   ```
 
 ### Frontend Setup
 
