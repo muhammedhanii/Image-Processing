@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "AIU Image Toolkit",
-  description: "Image Processing and Cryptography Toolkit based on CSE281 Lectures",
+  title: "Image Processing Tool",
+  
 };
 
 export default function RootLayout({
